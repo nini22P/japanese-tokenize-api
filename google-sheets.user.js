@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Sheets - Japanese Tokenizer
-// @version      2026-02-08
+// @version      26.02.08.1
 // @match        https://docs.google.com/spreadsheets/d/*
 // @grant        GM_xmlhttpRequest
 // @connect      localhost
@@ -74,7 +74,7 @@
       const tokenGroup = document.createElement('div');
       tokenGroup.style.display = 'inline-flex';
       tokenGroup.style.alignItems = 'flex-end';
-      tokenGroup.style.marginBottom = '4px';
+      tokenGroup.style.marginBottom = '3px';
 
       if (token.p.includes('記号') || token.s.includes('[') || token.s.includes(']') || token.s.includes('|')) {
         const symbolSpan = document.createElement('span');
@@ -96,7 +96,7 @@
       rt.style.display = 'flex';
       rt.style.flexDirection = 'column';
       rt.style.alignItems = 'center';
-      rt.style.fontSize = '11px';
+      rt.style.fontSize = '12px';
       rt.style.lineHeight = '1.3';
       rt.style.color = '#1a73e8';
 
@@ -115,16 +115,36 @@
       ruby.appendChild(rt);
       tokenGroup.appendChild(ruby);
 
-      const posLabel = document.createElement('span');
-      posLabel.style.fontSize = '11px';
-      posLabel.style.color = '#70757a';
-      posLabel.style.backgroundColor = '#f1f3f4';
-      posLabel.style.padding = '3px 2px 2px 2px';
-      posLabel.style.borderRadius = '2px';
-      posLabel.style.marginLeft = '3px';
-      posLabel.textContent = token.p;
+      const posContainer = document.createElement('div');
+      posContainer.style.display = 'inline-flex';
+      posContainer.style.flexDirection = 'column';
+      posContainer.style.flexWrap = 'wrap';
+      posContainer.style.maxHeight = '48px';
+      posContainer.style.gap = '2px';
+      posContainer.style.marginLeft = '4px';
+      posContainer.style.marginBottom = '1px';
+      posContainer.style.alignContent = 'flex-start';
 
-      tokenGroup.appendChild(posLabel);
+      const posTags = token.p.split(',');
+
+      posTags.forEach(tag => {
+        if (tag.trim()) {
+          const posLabel = document.createElement('span');
+          posLabel.style.display = 'inline-block';
+          posLabel.style.fontSize = '11px';
+          posLabel.style.color = '#70757a';
+          posLabel.style.backgroundColor = '#f1f3f4';
+          posLabel.style.borderRadius = '2px';
+          posLabel.style.whiteSpace = 'nowrap';
+          posLabel.style.padding = '1px 2px 0.5px 2px';
+          posLabel.style.verticalAlign = 'middle';
+          posLabel.textContent = tag;
+
+          posContainer.appendChild(posLabel);
+        }
+      });
+
+      tokenGroup.appendChild(posContainer);
       infoBar.appendChild(tokenGroup);
     });
   }
