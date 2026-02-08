@@ -4,6 +4,8 @@
 // @match        https://docs.google.com/spreadsheets/d/*
 // @grant        GM_xmlhttpRequest
 // @connect      localhost
+// @downloadURL  https://github.com/nini22P/japanese-tokenize-api/raw/refs/heads/main/google-sheets.user.js
+// @updateURL    https://github.com/nini22P/japanese-tokenize-api/raw/refs/heads/main/google-sheets.user.js
 // ==/UserScript==
 
 (function () {
