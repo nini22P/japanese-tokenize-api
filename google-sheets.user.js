@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         Google Sheets - Japanese Tokenizer
-// @version      26.02.08.1
+// @version      26.02.08.2
 // @match        https://docs.google.com/spreadsheets/d/*
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @connect      localhost
 // @downloadURL  https://github.com/nini22P/japanese-tokenize-api/raw/refs/heads/main/google-sheets.user.js
 // @updateURL    https://github.com/nini22P/japanese-tokenize-api/raw/refs/heads/main/google-sheets.user.js
@@ -11,26 +13,73 @@
 (function () {
   'use strict';
 
-  const TARGET_COL_LETTER = 'E';
+  let targetCols = GM_getValue('target_cols', 'E').toUpperCase().split(',').map(s => s.trim());
   let lastText = "";
+
+  const container = document.createElement('div');
+  container.id = 'custom-info-bar-container';
+  Object.assign(container.style, {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderTop: '1px solid #e8eaed',
+    height: '50px',
+    width: '100%',
+    boxSizing: 'border-box'
+  });
 
   const infoBar = document.createElement('div');
   infoBar.id = 'custom-info-bar';
   Object.assign(infoBar.style, {
     padding: '0px 8px',
-    backgroundColor: '#ffffff',
-    borderTop: '1px solid #e8eaed',
     fontSize: '14px',
     color: '#202124',
     display: 'flex',
     flexWrap: 'nowrap',
     alignItems: 'flex-end',
     gap: '6px',
-    height: '48px',
+    height: '100%',
     overflowX: 'auto',
     whiteSpace: 'nowrap',
     lineHeight: 1,
+    flexGrow: '1',
+    borderRight: '1px solid #e8eaed',
   });
+
+  const settingsBtn = document.createElement('button');
+  settingsBtn.textContent = '⚙️';
+  settingsBtn.title = `当前监听列: ${targetCols.join(', ')}`;
+  Object.assign(settingsBtn.style, {
+    border: 'none',
+    background: 'none',
+    cursor: 'pointer',
+    fontSize: '18px',
+    padding: '0 6px',
+    height: '100%',
+    color: '#5f6368',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeft: '1px solid #f1f3f4'
+  });
+
+  container.appendChild(infoBar);
+  container.appendChild(settingsBtn);
+
+  settingsBtn.onclick = () => {
+    const current = targetCols.join(', ');
+    const input = prompt("请输入要触发分词的列号（多个请用逗号隔开，例如: E, G, H）:", current);
+    if (input !== null) {
+      const newCols = input.toUpperCase().split(',').map(s => s.trim()).filter(s => s.length > 0);
+      if (newCols.length > 0) {
+        targetCols = newCols;
+        GM_setValue('target_cols', targetCols.join(','));
+        settingsBtn.title = `当前监听列: ${targetCols.join(', ')}`;
+        alert(`设置已保存！当前监听列: ${targetCols.join(', ')}`);
+        sync();
+      }
+    }
+  };
 
   infoBar.addEventListener('wheel', (e) => {
     if (infoBar.scrollWidth > infoBar.clientWidth) {
@@ -48,11 +97,11 @@
             background: transparent;
         }
         #custom-info-bar::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.25);
             border-radius: 10px;
         }
         #custom-info-bar::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.5);
         }
     `;
   document.head.appendChild(style);
@@ -60,11 +109,11 @@
   injectBar();
 
   function injectBar() {
-    const container = document.getElementById('formula-bar-container');
-    if (container && !document.getElementById('custom-info-bar')) {
-      container.appendChild(infoBar);
-      container.style.display = 'flex';
-      container.style.flexDirection = 'column';
+    const formulaContainer = document.getElementById('formula-bar-container');
+    if (formulaContainer && !document.getElementById('custom-info-bar-container')) {
+      formulaContainer.appendChild(container);
+      formulaContainer.style.display = 'flex';
+      formulaContainer.style.flexDirection = 'column';
     }
   }
 
@@ -152,11 +201,17 @@
   }
 
   async function sync() {
-
     const nameBox = document.getElementById('t-name-box');
     if (!nameBox) return;
+
     const coord = nameBox.value;
-    if (coord && coord.startsWith(TARGET_COL_LETTER) && !coord.includes(':')) {
+    if (!coord || coord.includes(':')) return;
+
+    const match = coord.match(/^[A-Z]+/);
+    if (!match) return;
+    const currentCol = match[0];
+
+    if (targetCols.includes(currentCol)) {
       const cellInput = document.querySelector('.cell-input');
       if (!cellInput) return;
       let text = cellInput.innerText.trim();
@@ -172,10 +227,7 @@
             p += m[1];
             b += m[2];
           });
-
-          let optimizedP = p.replace(/・+/g, '・');
-
-          return `[${optimizedP}|${b}]`;
+          return `[${p.replace(/・+/g, '・')}|${b}]`;
         });
       }
 
