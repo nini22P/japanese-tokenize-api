@@ -45,5 +45,6 @@ class TokenizeHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(tokens_data).encode('utf-8'))
 
 if __name__ == '__main__':
-    server = HTTPServer(('0.0.0.0', 3000), TokenizeHandler)
+    server = HTTPServer(('localhost', 3000), TokenizeHandler)
+    print("Server started on port 3000")
     server.serve_forever()
