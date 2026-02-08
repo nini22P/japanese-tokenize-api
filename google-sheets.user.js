@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name         Google Sheets 校对助手
+// @version      2026-02-08
 // @match        https://docs.google.com/spreadsheets/d/*
 // @grant        GM_xmlhttpRequest
 // @connect      localhost
@@ -22,7 +23,7 @@
     display: 'flex',
     flexWrap: 'nowrap',
     alignItems: 'flex-end',
-    gap: '4px',
+    gap: '6px',
     height: '48px',
     overflowX: 'auto',
     whiteSpace: 'nowrap',
@@ -115,13 +116,13 @@
       tokenGroup.appendChild(ruby);
 
       const posLabel = document.createElement('span');
-      posLabel.style.fontSize = '10px';
+      posLabel.style.fontSize = '11px';
       posLabel.style.color = '#70757a';
       posLabel.style.backgroundColor = '#f1f3f4';
-      posLabel.style.padding = '1px';
-      posLabel.style.borderRadius = '3px';
-      posLabel.style.marginLeft = '2px';
-      posLabel.textContent = token.p;
+      posLabel.style.padding = '3px 2px 2px 2px';
+      posLabel.style.borderRadius = '2px';
+      posLabel.style.marginLeft = '3px';
+      posLabel.textContent = token.p.replace('詞', '');
 
       tokenGroup.appendChild(posLabel);
       infoBar.appendChild(tokenGroup);
