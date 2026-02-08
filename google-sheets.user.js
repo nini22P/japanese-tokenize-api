@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Google Sheets 校对助手
+// @name         Google Sheets - Japanese Tokenizer
 // @version      2026-02-08
 // @match        https://docs.google.com/spreadsheets/d/*
 // @grant        GM_xmlhttpRequest
@@ -76,7 +76,7 @@
       tokenGroup.style.alignItems = 'flex-end';
       tokenGroup.style.marginBottom = '4px';
 
-      if (token.p === '記号' || token.s.includes('[') || token.s.includes(']') || token.s.includes('|')) {
+      if (token.p.includes('記号') || token.s.includes('[') || token.s.includes(']') || token.s.includes('|')) {
         const symbolSpan = document.createElement('span');
         symbolSpan.textContent = token.s;
         symbolSpan.style.padding = '0 2px';
@@ -122,7 +122,7 @@
       posLabel.style.padding = '3px 2px 2px 2px';
       posLabel.style.borderRadius = '2px';
       posLabel.style.marginLeft = '3px';
-      posLabel.textContent = token.p.replace('詞', '');
+      posLabel.textContent = token.p;
 
       tokenGroup.appendChild(posLabel);
       infoBar.appendChild(tokenGroup);

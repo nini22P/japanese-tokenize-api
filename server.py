@@ -24,10 +24,15 @@ class TokenizeHandler(BaseHTTPRequestHandler):
             tokens_data = []
             for token in t.tokenize(text):
                 surface = token.surface
-                reading = token.reading
-                pos = token.part_of_speech.split(',')[0]
                 
-                res = kks.convert(surface)
+                pos_list = [p for p in token.part_of_speech.split(',') if p != '*']
+                pos = ", ".join(pos_list)
+
+                if token.reading != '*':
+                    res = kks.convert(token.reading)
+                else:
+                    res = kks.convert(surface)
+                
                 hira = "".join([i['hira'] for i in res])
                 roma = "".join([i['hepburn'] for i in res])
                 
@@ -42,7 +47,7 @@ class TokenizeHandler(BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps(tokens_data).encode('utf-8'))
+            self.wfile.write(json.dumps(tokens_data, ensure_ascii=False).encode('utf-8'))
 
 if __name__ == '__main__':
     server = HTTPServer(('localhost', 3000), TokenizeHandler)
